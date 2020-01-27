@@ -1,0 +1,8 @@
+
+**** Build of configuration Debug for project freertos_builds_CC3220S_LAUNCHXL_release_gcc ****
+
+"C:\\ti\\ccs930\\ccs\\utils\\bin\\gmake" -k -j 4 all -O 
+ 
+gmake: Nothing to be done for 'all'.
+
+**** Build Finished ****
