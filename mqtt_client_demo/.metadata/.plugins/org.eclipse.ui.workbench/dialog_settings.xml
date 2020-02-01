@@ -10,19 +10,17 @@
 		<item value="695" key="dialogHeight"/>
 		<item value="775" key="dialogWidth"/>
 		<list key="textEntries">
-			<item value="1"/>
 		</list>
 		<list key="orderedElements">
-			<item value="search.in.help"/>
 		</list>
 		<list key="orderedProviders">
-			<item value="org.eclipse.ui.actions"/>
 		</list>
 		<list key="textArray">
-			<item value="task view"/>
 		</list>
 	</section>
 	<section name="MemoryDumperFillAction">
+		<item value="TIXDS110" key="com.ti.ccstudio.system.setup.ui.editors.connectionType"/>
+		<item value="Texas Instruments XDS110 USB Debug Probe" key="com.ti.ccstudio.system.setup.ui.editors.connectionName"/>
 	</section>
 	<section name="ImportExportAction">
 	</section>

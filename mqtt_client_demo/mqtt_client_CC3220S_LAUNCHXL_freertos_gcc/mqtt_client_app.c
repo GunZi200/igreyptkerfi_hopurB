@@ -107,7 +107,7 @@
 
 /* Defining Broker IP address and port Number                                */
 //#define SERVER_ADDRESS           "messagesight.demos.ibm.com"
-#define SERVER_ADDRESS           "m2m.eclipse.org"
+#define SERVER_ADDRESS           "mqtt.eclipse.org"
 #define SERVER_IP_ADDRESS        "192.168.178.67"
 #define PORT_NUMBER              1883
 #define SECURED_PORT_NUMBER      8883
@@ -120,13 +120,13 @@
 #define RETAIN_ENABLE            1
 
 /* Defining Number of subscription topics                                    */
-#define SUBSCRIPTION_TOPIC_COUNT 4
+//#define SUBSCRIPTION_TOPIC_COUNT 4
 
 /* Defining Subscription Topic Values                                        */
-#define SUBSCRIPTION_TOPIC0      "/Broker/To/cc32xx"
-#define SUBSCRIPTION_TOPIC1      "/cc3200/ToggleLEDCmdL1"
-#define SUBSCRIPTION_TOPIC2      "/cc3200/ToggleLEDCmdL2"
-#define SUBSCRIPTION_TOPIC3      "/cc3200/ToggleLEDCmdL3"
+//#define SUBSCRIPTION_TOPIC0      "/Broker/To/cc32xx"
+//#define SUBSCRIPTION_TOPIC1      "/cc3200/ToggleLEDCmdL1"
+//#define SUBSCRIPTION_TOPIC2      "/cc3200/ToggleLEDCmdL2"
+//#define SUBSCRIPTION_TOPIC3      "/cc3200/ToggleLEDCmdL3"
 
 /* Defining Publish Topic Values                                             */
 #define PUBLISH_TOPIC0           "/cc32xx/ButtonPressEvtSw2"
@@ -210,12 +210,12 @@ const char *ClientUsername = "username1";
 const char *ClientPassword = "pwd1";
 
 /* Subscription topics and qos values                                        */
-char *topic[SUBSCRIPTION_TOPIC_COUNT] =
-{ SUBSCRIPTION_TOPIC0, SUBSCRIPTION_TOPIC1, \
+//char *topic[SUBSCRIPTION_TOPIC_COUNT] =
+//{ SUBSCRIPTION_TOPIC0, SUBSCRIPTION_TOPIC1, \
     SUBSCRIPTION_TOPIC2, SUBSCRIPTION_TOPIC3 };
 
-unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
-{ MQTT_QOS_2, MQTT_QOS_2, MQTT_QOS_2, MQTT_QOS_2 };
+//unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
+//{ MQTT_QOS_2, MQTT_QOS_2, MQTT_QOS_2, MQTT_QOS_2 };
 
 /* Publishing topics and messages                                            */
 const char *publish_topic = { PUBLISH_TOPIC0 };
@@ -575,7 +575,7 @@ void * MqttClient(void *pvParameters)
 
         /*msg received by client from remote broker (on a topic      */
         /*subscribed by local client)                                */
-        case MSG_RECV_BY_CLIENT:
+        /*case MSG_RECV_BY_CLIENT:
             tmpBuff = (char *) ((char *) queueElemRecv.msgPtr + 12);
             if(strncmp
                 (tmpBuff, SUBSCRIPTION_TOPIC1, queueElemRecv.topLen) == 0)
@@ -594,7 +594,7 @@ void * MqttClient(void *pvParameters)
             }
 
             free(queueElemRecv.msgPtr);
-            break;
+            break;*/
 
         /*On-board client disconnected from remote broker, only      */
         /*local MQTT network will work                               */
@@ -902,8 +902,8 @@ int32_t MqttClient_start()
         if((gUiConnFlag == 1) && (0 == lRetVal))
         {
             uint8_t subIndex;
-            MQTTClient_SubscribeParams subscriptionInfo[
-                SUBSCRIPTION_TOPIC_COUNT];
+            /*MQTTClient_SubscribeParams subscriptionInfo[
+               SUBSCRIPTION_TOPIC_COUNT];
 
             for(subIndex = 0; subIndex < SUBSCRIPTION_TOPIC_COUNT; subIndex++)
             {
@@ -924,7 +924,7 @@ int32_t MqttClient_start()
                 {
                     UART_PRINT("Client subscribed on %s\n\r,", topic[iCount]);
                 }
-            }
+            }*/
         }
     }
 
@@ -948,7 +948,7 @@ void Mqtt_ClientStop(uint8_t disconnect)
 {
     uint32_t iCount;
 
-    MQTTClient_UnsubscribeParams subscriptionInfo[SUBSCRIPTION_TOPIC_COUNT];
+    /*MQTTClient_UnsubscribeParams subscriptionInfo[SUBSCRIPTION_TOPIC_COUNT];
 
     for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
     {
@@ -960,7 +960,7 @@ void Mqtt_ClientStop(uint8_t disconnect)
     for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
     {
         UART_PRINT("Unsubscribed from the topic %s\r\n", topic[iCount]);
-    }
+    }*/
     gUiConnFlag = 0;
 
     /*exiting the Client library                                             */
@@ -1213,10 +1213,10 @@ void mainThread(void * args)
     while(1)
     {
         gResetApplication = false;
-        topic[0] = SUBSCRIPTION_TOPIC0;
+        /*topic[0] = SUBSCRIPTION_TOPIC0;
         topic[1] = SUBSCRIPTION_TOPIC1;
         topic[2] = SUBSCRIPTION_TOPIC2;
-        topic[3] = SUBSCRIPTION_TOPIC3;
+        topic[3] = SUBSCRIPTION_TOPIC3;*/
         gInitState = 0;
 
         /*Connect to AP                                                      */

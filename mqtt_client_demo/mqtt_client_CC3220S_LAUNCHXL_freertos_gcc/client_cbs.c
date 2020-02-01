@@ -136,7 +136,7 @@ void MqttClientCallback(int32_t event,
             break;
         }
 
-        case MQTTCLIENT_OPERATION_SUBACK:
+        /*case MQTTCLIENT_OPERATION_SUBACK:
         {
             APP_PRINT("Sub Ack:\n\r");
             APP_PRINT("Granted QoS Levels are:\n\r");
@@ -146,15 +146,15 @@ void MqttClientCallback(int32_t event,
                           ((unsigned char*) data)[i]);
             }
             break;
-        }
+        }*/
 
-        case MQTTCLIENT_OPERATION_UNSUBACK:
+        /*case MQTTCLIENT_OPERATION_UNSUBACK:
         {
             char *UnSub = (char *) data;
             APP_PRINT("UnSub Ack \n\r");
             APP_PRINT("%s\n\r", UnSub);
             break;
-        }
+        }*/
 
         default:
             break;
