@@ -35,6 +35,7 @@
  */
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 
 /* POSIX Header files */
 #include <pthread.h>
@@ -54,8 +55,8 @@
 /* ADC conversion result variables */
 uint16_t adcValue0;
 uint32_t adcValue0MicroVolt;
-uint16_t adcValue1[ADC_SAMPLE_COUNT];
-uint32_t adcValue1MicroVolt[ADC_SAMPLE_COUNT];
+uint16_t adcValue1;
+uint32_t adcValue1MicroVolt;
 
 static Display_Handle display;
 
@@ -68,31 +69,31 @@ void *threadFxn0(void *arg0)
     ADC_Handle   adc;
     ADC_Params   params;
     int_fast16_t res;
+    while(1){
+        ADC_Params_init(&params);
+        adc = ADC_open(CONFIG_ADC_0, &params);
 
-    ADC_Params_init(&params);
-    adc = ADC_open(CONFIG_ADC_0, &params);
+        if (adc == NULL) {
+            Display_printf(display, 0, 0, "Error initializing ADC0\n");
+            while (1);
+        }
 
-    if (adc == NULL) {
-        Display_printf(display, 0, 0, "Error initializing ADC0\n");
-        while (1);
+        /* Blocking mode conversion */
+        res = ADC_convert(adc, &adcValue0);
+
+        if (res == ADC_STATUS_SUCCESS) {
+
+            adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
+
+            //Display_printf(display, 0, 0, "ADC0 raw result: %d\n", adcValue0);
+            Display_printf(display, 0, 0,"ADC0 convert result: %4.2f V\n", (float) adcValue0MicroVolt/1000000.0);
+        }
+        else {
+            Display_printf(display, 0, 0, "ADC0 convert failed\n");
+        }
+
+        ADC_close(adc);
     }
-
-    /* Blocking mode conversion */
-    res = ADC_convert(adc, &adcValue0);
-
-    if (res == ADC_STATUS_SUCCESS) {
-
-        adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
-
-        Display_printf(display, 0, 0, "ADC0 raw result: %d\n", adcValue0);
-        Display_printf(display, 0, 0, "ADC0 convert result: %d uV\n",
-            adcValue0MicroVolt);
-    }
-    else {
-        Display_printf(display, 0, 0, "ADC0 convert failed\n");
-    }
-
-    ADC_close(adc);
 
     return (NULL);
 }
@@ -104,37 +105,35 @@ void *threadFxn0(void *arg0)
  */
 void *threadFxn1(void *arg0)
 {
-    uint16_t     i;
     ADC_Handle   adc;
     ADC_Params   params;
     int_fast16_t res;
+    while(1){
+        ADC_Params_init(&params);
+        adc = ADC_open(CONFIG_ADC_1, &params);
 
-    ADC_Params_init(&params);
-    adc = ADC_open(CONFIG_ADC_1, &params);
+        if (adc == NULL) {
+            Display_printf(display, 0, 0, "Error initializing ADC1\n");
+            while (1);
+        }
 
-    if (adc == NULL) {
-        Display_printf(display, 0, 0, "Error initializing ADC1\n");
-        while (1);
-    }
-
-    for (i = 0; i < ADC_SAMPLE_COUNT; i++) {
-        res = ADC_convert(adc, &adcValue1[i]);
+        res = ADC_convert(adc, &adcValue1);
 
         if (res == ADC_STATUS_SUCCESS) {
 
-            adcValue1MicroVolt[i] = ADC_convertRawToMicroVolts(adc, adcValue1[i]);
+            adcValue1MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue1);
 
-            Display_printf(display, 0, 0, "ADC1 raw result (%d): %d\n", i,
-                           adcValue1[i]);
-            Display_printf(display, 0, 0, "ADC1 convert result (%d): %d uV\n", i,
-                adcValue1MicroVolt[i]);
+            //Display_printf(display, 0, 0, "ADC1 raw result: %d \n",
+                           //adcValue1);
+            Display_printf(display, 0, 0, "ADC1 convert result: %f V\n", (float) adcValue1MicroVolt/1000000.0);
         }
         else {
-            Display_printf(display, 0, 0, "ADC1 convert failed (%d)\n", i);
+            Display_printf(display, 0, 0, "ADC1 convert failed \n");
         }
+
+        ADC_close(adc);
     }
 
-    ADC_close(adc);
 
     return (NULL);
 }
@@ -196,6 +195,7 @@ void *mainThread(void *arg0)
         /* pthread_create() failed */
         while (1);
     }
+
 
     return (NULL);
 }
