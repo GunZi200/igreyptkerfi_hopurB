@@ -1,0 +1,8 @@
+runtime_xdc_noinit.o: \
+ C:/ti/ccs930/xdctools_3_60_02_34_core/packages/xdc/runtime/xdc_noinit.c \
+ c:\ti\simplelink_cc32xx_sdk_3_40_00_05\kernel\tirtos\packages\gnu\targets\arm\libs\install-native\arm-none-eabi\include\stdint.h \
+ c:\ti\simplelink_cc32xx_sdk_3_40_00_05\kernel\tirtos\packages\gnu\targets\arm\libs\install-native\arm-none-eabi\include\machine\_default_types.h \
+ c:\ti\simplelink_cc32xx_sdk_3_40_00_05\kernel\tirtos\packages\gnu\targets\arm\libs\install-native\arm-none-eabi\include\sys\features.h \
+ c:\ti\simplelink_cc32xx_sdk_3_40_00_05\kernel\tirtos\packages\gnu\targets\arm\libs\install-native\arm-none-eabi\include\_newlib_version.h \
+ c:\ti\simplelink_cc32xx_sdk_3_40_00_05\kernel\tirtos\packages\gnu\targets\arm\libs\install-native\arm-none-eabi\include\sys\_intsup.h \
+ c:\ti\simplelink_cc32xx_sdk_3_40_00_05\kernel\tirtos\packages\gnu\targets\arm\libs\install-native\arm-none-eabi\include\sys\_stdint.h

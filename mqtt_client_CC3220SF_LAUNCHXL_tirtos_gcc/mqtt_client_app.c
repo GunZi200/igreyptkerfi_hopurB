@@ -46,10 +46,14 @@
 //*****************************************************************************
 //
 //! \addtogroup mqtt_server
+
 //! @{
 //
 //*****************************************************************************
-/* Standard includes                                                         */
+/* Standard includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <mqueue.h>
@@ -72,12 +76,109 @@
 /* Common interface includes                                                 */
 #include "network_if.h"
 #include "uart_term.h"
+//#include "utils/uartstdio.h"
+
+/* Driver Header files */
+#include <ti/drivers/ADC.h>
+//#include <ti/display/Display.h>
 
 /* TI-DRIVERS Header files */
 #include "ti_drivers_config.h"
 
 /* Application includes                                                      */
 #include "client_cbs.h"
+
+/* ADC sample count */
+#define ADC_SAMPLE_COUNT  (10)
+
+/* ADC conversion result variables */
+uint16_t adcValue0;
+uint32_t adcValue0MicroVolt;
+uint16_t adcValue1;
+uint32_t adcValue1MicroVolt;
+
+//static Display_Handle display;
+
+/*
+ *  ======== threadFxn0 ========
+ *  Open an ADC instance and get a sampling result from a one-shot conversion.
+ */
+void *threadFxn0(void *arg0)
+{
+    ADC_Handle   adc;
+    ADC_Params   params;
+    int_fast16_t res;
+    while(1){
+        ADC_Params_init(&params);
+        adc = ADC_open(CONFIG_ADC_0, &params);
+
+        if (adc == NULL) {
+            UART_PRINT("Error initializing ADC0\n");
+            while (1);
+        }
+
+        /* Blocking mode conversion */
+        res = ADC_convert(adc, &adcValue0);
+
+        if (res == ADC_STATUS_SUCCESS) {
+
+            adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
+
+            //Display_printf(display, 0, 0, "ADC0 raw result: %d\n", adcValue0);
+            //UART_PRINT("ADC0 convert result: %4.2f V\n\r", (float) adcValue0MicroVolt/1000000.0);
+            char buffer[8];
+            UART_PRINT("ADC0 convert result: ");
+            sprintf(buffer, "%4.2f\n", (float)adcValue0MicroVolt/1000000.0);
+            UART_PRINT("%s", buffer);
+            UART_PRINT("V\n\r");
+        }
+        else {
+            UART_PRINT("ADC0 convert failed\n");
+        }
+
+        ADC_close(adc);
+    }
+
+    return (NULL);
+}
+
+/*
+ *  ======== threadFxn1 ========
+ *  Open a ADC handle and get an array of sampling results after
+ *  calling several conversions.
+ */
+void *threadFxn1(void *arg0)
+{
+    ADC_Handle   adc;
+    ADC_Params   params;
+    int_fast16_t res;
+    while(1){
+        ADC_Params_init(&params);
+        adc = ADC_open(CONFIG_ADC_1, &params);
+
+        if (adc == NULL) {
+            UART_PRINT("Error initializing ADC1\n");
+            while (1);
+        }
+
+        res = ADC_convert(adc, &adcValue1);
+
+        if (res == ADC_STATUS_SUCCESS) {
+
+            adcValue1MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue1);
+
+            //Display_printf(display, 0, 0, "ADC1 raw result: %d \n",
+                           //adcValue1);
+            UART_PRINT("ADC1 convert result: %f V\n\r", (float) adcValue1MicroVolt/1000000.0);
+        }
+        else {
+            UART_PRINT("ADC1 convert failed \n");
+        }
+
+        ADC_close(adc);
+    }
+    return (NULL);
+}
 
 //*****************************************************************************
 //                          LOCAL DEFINES
@@ -102,7 +203,7 @@
 
 #define WILL_TOPIC               "Client"
 #define WILL_MSG                 "Client Stopped"
-#define WILL_QOS                 MQTT_QOS_2
+#define WILL_QOS                 MQTT_QOS_0
 #define WILL_RETAIN              false
 
 /* Defining Broker IP address and port Number                                */
@@ -119,15 +220,6 @@
 /* Retain Flag. Used in publish message.                                     */
 #define RETAIN_ENABLE            1
 
-/* Defining Number of subscription topics                                    */
-#define SUBSCRIPTION_TOPIC_COUNT 4
-
-/* Defining Subscription Topic Values                                        */
-#define SUBSCRIPTION_TOPIC0      "/Broker/To/cc32xx"
-#define SUBSCRIPTION_TOPIC1      "/cc3200/ToggleLEDCmdL1"
-#define SUBSCRIPTION_TOPIC2      "/cc3200/ToggleLEDCmdL2"
-#define SUBSCRIPTION_TOPIC3      "/cc3200/ToggleLEDCmdL3"
-
 /* Defining Publish Topic Values                                             */
 #define PUBLISH_TOPIC0           "/cc32xx/ButtonPressEvtSw2"
 #define PUBLISH_TOPIC0_DATA \
@@ -137,7 +229,7 @@
 #define TASKSTACKSIZE            2048
 #define RXTASKSIZE               4096
 #define MQTTTHREADSIZE           2048
-#define SPAWN_TASK_PRIORITY      9
+#define SPAWN_TASK_PRIORITY      2
 
 /* secured client requires time configuration, in order to verify server     */
 /* certificate validity (date).                                              */
@@ -213,14 +305,6 @@ char ClientId[13] = {'\0'};
 /* Client User Name and Password                                             */
 const char *ClientUsername = "username1";
 const char *ClientPassword = "pwd1";
-
-/* Subscription topics and qos values                                        */
-char *topic[SUBSCRIPTION_TOPIC_COUNT] =
-{ SUBSCRIPTION_TOPIC0, SUBSCRIPTION_TOPIC1, \
-    SUBSCRIPTION_TOPIC2, SUBSCRIPTION_TOPIC3 };
-
-unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
-{ MQTT_QOS_2, MQTT_QOS_2, MQTT_QOS_2, MQTT_QOS_2 };
 
 /* Publishing topics and messages                                            */
 const char *publish_topic = { PUBLISH_TOPIC0 };
@@ -529,7 +613,7 @@ void * MqttClient(void *pvParameters)
 {
     struct msgQueue queueElemRecv;
     long lRetVal = -1;
-    char *tmpBuff;
+    //char *tmpBuff;
 
     /*Initializing Client and Subscribing to the Broker.                     */
     if(gApConnectionState >= 0)
@@ -553,9 +637,7 @@ void * MqttClient(void *pvParameters)
     for(;; )
     {
         /*waiting for signals                                                */
-        mq_receive(g_PBQueue, (char*) &queueElemRecv, sizeof(struct msgQueue),
-                   NULL);
-
+        if (mq_receive(g_PBQueue, (char*) &queueElemRecv, sizeof(struct msgQueue), NULL) == 0) break;
         switch(queueElemRecv.event)
         {
         case PUBLISH_PUSH_BUTTON_PRESSED:
@@ -564,8 +646,8 @@ void * MqttClient(void *pvParameters)
             lRetVal =
                 MQTTClient_publish(gMqttClient, (char*) publish_topic, strlen(
                                       (char*)publish_topic),
-                                  (char*)publish_data,
-                                  strlen((char*) publish_data), MQTT_QOS_2 |
+                                  (char*)publish_data, // ADC mæling hér
+                                  strlen((char*) publish_data), MQTT_QOS_0 |
                                   ((RETAIN_ENABLE) ? MQTT_PUBLISH_RETAIN : 0));
 
             UART_PRINT("\n\r CC3200 Publishes the following message \n\r");
@@ -576,29 +658,6 @@ void * MqttClient(void *pvParameters)
             GPIO_clearInt(CONFIG_GPIO_BUTTON_0);     // SW2
             GPIO_enableInt(CONFIG_GPIO_BUTTON_0);     // SW2
 
-            break;
-
-        /*msg received by client from remote broker (on a topic      */
-        /*subscribed by local client)                                */
-        case MSG_RECV_BY_CLIENT:
-            tmpBuff = (char *) ((char *) queueElemRecv.msgPtr + 12);
-            if(strncmp
-                (tmpBuff, SUBSCRIPTION_TOPIC1, queueElemRecv.topLen) == 0)
-            {
-                GPIO_toggle(CONFIG_GPIO_LED_0);
-            }
-            else if(strncmp(tmpBuff, SUBSCRIPTION_TOPIC2,
-                            queueElemRecv.topLen) == 0)
-            {
-                GPIO_toggle(CONFIG_GPIO_LED_1);
-            }
-            else if(strncmp(tmpBuff, SUBSCRIPTION_TOPIC3,
-                            queueElemRecv.topLen) == 0)
-            {
-                GPIO_toggle(CONFIG_GPIO_LED_2);
-            }
-
-            free(queueElemRecv.msgPtr);
             break;
 
         /*On-board client disconnected from remote broker, only      */
@@ -899,38 +958,7 @@ int32_t MqttClient_start()
 
             gUiConnFlag = 0;
         }
-        else
-        {
-            gUiConnFlag = 1;
-        }
-        /*Subscribe to topics when session is not stored by the server       */
-        if((gUiConnFlag == 1) && (0 == lRetVal))
-        {
-            uint8_t subIndex;
-            MQTTClient_SubscribeParams subscriptionInfo[
-                SUBSCRIPTION_TOPIC_COUNT];
-
-            for(subIndex = 0; subIndex < SUBSCRIPTION_TOPIC_COUNT; subIndex++)
-            {
-                subscriptionInfo[subIndex].topic = topic[subIndex];
-                subscriptionInfo[subIndex].qos = qos[subIndex];
-            }
-
-            if(MQTTClient_subscribe(gMqttClient, subscriptionInfo,
-                                    SUBSCRIPTION_TOPIC_COUNT) < 0)
-            {
-                UART_PRINT("\n\r Subscription Error \n\r");
-                MQTTClient_disconnect(gMqttClient);
-                gUiConnFlag = 0;
-            }
-            else
-            {
-                for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
-                {
-                    UART_PRINT("Client subscribed on %s\n\r,", topic[iCount]);
-                }
-            }
-        }
+        else { gUiConnFlag = 1;}
     }
 
     gInitState &= ~CLIENT_INIT_STATE;
@@ -951,21 +979,7 @@ int32_t MqttClient_start()
 
 void Mqtt_ClientStop(uint8_t disconnect)
 {
-    uint32_t iCount;
 
-    MQTTClient_UnsubscribeParams subscriptionInfo[SUBSCRIPTION_TOPIC_COUNT];
-
-    for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
-    {
-        subscriptionInfo[iCount].topic = topic[iCount];
-    }
-
-    MQTTClient_unsubscribe(gMqttClient, subscriptionInfo,
-                           SUBSCRIPTION_TOPIC_COUNT);
-    for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
-    {
-        UART_PRINT("Unsubscribed from the topic %s\r\n", topic[iCount]);
-    }
     gUiConnFlag = 0;
 
     /*exiting the Client library                                             */
@@ -1135,11 +1149,12 @@ int32_t DisplayAppBanner(char* appName,
 void mainThread(void * args)
 {
     uint32_t count = 0;
-    pthread_t spawn_thread = (pthread_t) NULL;
-    pthread_attr_t pAttrs_spawn;
+    pthread_t spawn_thread, thread0, thread1;
+    pthread_attr_t pAttrs_spawn, pAttrs_adc;
     struct sched_param priParam;
     int32_t retc = 0;
     UART_Handle tUartHndl;
+    int detachState;
 
     /*Initialize SlNetSock layer with CC31xx/CC32xx interface */
     retc = ti_net_SlNet_initConfig();
@@ -1150,6 +1165,16 @@ void mainThread(void * args)
 
     GPIO_init();
     SPI_init();
+    /* Call driver init functions */
+    ADC_init();
+    //Display_init();
+
+    /* Open the display for output */
+    /*display = Display_open(Display_Type_UART, NULL);
+    if (display == NULL) {
+        /* Failed to open display driver */
+        /*while (1);
+    }*/
 
     /*Configure the UART                                                     */
     tUartHndl = InitTerm();
@@ -1164,6 +1189,7 @@ void mainThread(void * args)
     retc |= pthread_attr_setdetachstate
                                     (&pAttrs_spawn, PTHREAD_CREATE_DETACHED);
 
+    //retc = pthread_create(&spawn_thread, &pAttrs_spawn, sl_Task, NULL);
     retc = pthread_create(&spawn_thread, &pAttrs_spawn, sl_Task, NULL);
 
     if(retc != 0)
@@ -1197,14 +1223,6 @@ void mainThread(void * args)
     {
         /*Handle Error */
         UART_PRINT("\n sl_Stop failed\n");
-        while(1)
-        {
-            ;
-        }
-    }
-
-    if(retc < 0)
-    {
         /*Handle Error */
         UART_PRINT("mqtt_client - Unable to retrieve device information \n");
         while(1)
@@ -1213,42 +1231,86 @@ void mainThread(void * args)
         }
     }
 
-    while(1)
+    gResetApplication = false;
+    gInitState = 0;
+
+    /*Connect to AP                                                      */
+    gApConnectionState = Mqtt_IF_Connect();
+
+    gInitState |= MQTT_INIT_STATE;
+    /*Run MQTT Main Thread (it will open the Client and Server)          */
+    Mqtt_start();
+
+    /*Wait for init to be completed!!!                                   */
+    while(gInitState != 0)
     {
-        gResetApplication = false;
-        topic[0] = SUBSCRIPTION_TOPIC0;
-        topic[1] = SUBSCRIPTION_TOPIC1;
-        topic[2] = SUBSCRIPTION_TOPIC2;
-        topic[3] = SUBSCRIPTION_TOPIC3;
-        gInitState = 0;
-
-        /*Connect to AP                                                      */
-        gApConnectionState = Mqtt_IF_Connect();
-
-        gInitState |= MQTT_INIT_STATE;
-        /*Run MQTT Main Thread (it will open the Client and Server)          */
-        Mqtt_start();
-
-        /*Wait for init to be completed!!!                                   */
-        while(gInitState != 0)
-        {
-            UART_PRINT(".");
-            sleep(1);
-        }
-        UART_PRINT(".\r\n");
-
-        while(gResetApplication == false)
-        {
-            ;
-        }
-
-        UART_PRINT("TO Complete - Closing all threads and resources\r\n");
-
-        /*Stop the MQTT Process                                              */
-        Mqtt_Stop();
-
-        UART_PRINT("reopen MQTT # %d  \r\n", ++count);
+        UART_PRINT(".");
+        sleep(1);
     }
+    UART_PRINT(".\r\n");
+
+    while(gResetApplication == false)
+    {
+        ;
+    }
+
+    UART_PRINT("TO Complete - Closing all threads and resources\r\n");
+
+
+
+    /* Open the display for output */
+    /*display = Display_open(Display_Type_UART, NULL);
+    if (display == NULL) {*/
+        /* Failed to open display driver */
+       /* while (1);
+    }*/
+
+    UART_PRINT("Starting the acdsinglechannel example\n");
+
+    /* Create application threads */
+    pthread_attr_init(&pAttrs_adc);
+
+    detachState = PTHREAD_CREATE_DETACHED;
+    /* Set priority and stack size attributes */
+    retc = pthread_attr_setdetachstate(&pAttrs_adc, detachState);
+    if (retc != 0) {
+        /* pthread_attr_setdetachstate() failed */
+        while (1);
+    }
+
+    retc |= pthread_attr_setstacksize(&pAttrs_adc, 1024);
+    if (retc != 0) {
+        /* pthread_attr_setstacksize() failed */
+        while (1);
+    }
+
+    /* Create threadFxn0 thread */
+    priParam.sched_priority = 1;
+    pthread_attr_setschedparam(&pAttrs_adc, &priParam);
+
+    retc = pthread_create(&thread0, &pAttrs_adc, threadFxn0, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        printf("Failed to create thread0.");
+        while (1);
+    }
+
+    /* Create threadFxn1 thread */
+    retc = pthread_create(&thread1, &pAttrs_adc, threadFxn1, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        printf("Failed to create thread1.");
+        while (1);
+    }
+
+    /*Stop the MQTT Process                                              */
+    Mqtt_Stop();
+
+    UART_PRINT("reopen MQTT # %d  \r\n", ++count);
+
+
+
+    return;
 }
 
 //*****************************************************************************

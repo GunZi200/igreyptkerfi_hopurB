@@ -42,6 +42,9 @@
 /* RTOS header files */
 #include <ti/sysbios/BIOS.h>
 
+/* Driver configuration */
+#include <ti/drivers/Board.h>
+
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
 
@@ -52,7 +55,7 @@
 extern void * mainThread(void *arg0);
 
 /* Stack size in bytes */
-#define THREADSTACKSIZE    4096
+#define THREADSTACKSIZE    5110
 
 /*
  *  ======== main ========
