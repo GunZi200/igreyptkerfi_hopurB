@@ -54,11 +54,14 @@ extern "C"
 #define MAX_CONNECTION              1
 
 #define PUBLISH_PUSH_BUTTON_PRESSED 1
+#define PUBLISH_ADC0                2
+#define PUBLISH_ADC1                3
 //#define MSG_RECV_BY_CLIENT          11
 /* Client disconnected from remote broker       */
 #define LOCAL_CLIENT_DISCONNECTION  12 
 #define DISC_PUSH_BUTTON_PRESSED    14
 #define THREAD_TERMINATE_REQ        15
+
 
 //*****************************************************************************
 // typedef enum/struct/union
@@ -79,7 +82,7 @@ struct client_info
 
 struct msgQueue
 {
-    int32_t event;
+    float event;
     void        *msgPtr;
     int32_t topLen;
 };

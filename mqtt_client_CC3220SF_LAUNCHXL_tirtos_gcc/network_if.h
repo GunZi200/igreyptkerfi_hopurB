@@ -59,11 +59,13 @@ extern "C"
 /* is executed.                                                               */
 
 /* AP SSID                                                                    */
-#define SSID_NAME               "Gudni_iPhone"
+//#define SSID_NAME               "Gudni_iPhone"
+#define SSID_NAME               "Airhome_P9PZG"
 /* Security type (OPEN or WEP or WPA)                                         */
 #define SECURITY_TYPE           SL_WLAN_SEC_TYPE_WPA
 /* Password of the secured AP                                                 */
-#define SECURITY_KEY            "gudni123"
+//#define SECURITY_KEY            "gudni123"
+#define SECURITY_KEY            "Vetur2015"
 
 #define SSID_AP_MODE            "<ap-ssid>"
 #define SEC_TYPE_AP_MODE        SL_WLAN_SEC_TYPE_OPEN

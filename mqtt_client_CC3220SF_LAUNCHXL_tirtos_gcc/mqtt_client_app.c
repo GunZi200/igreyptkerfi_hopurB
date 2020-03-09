@@ -99,86 +99,7 @@ uint32_t adcValue1MicroVolt;
 
 //static Display_Handle display;
 
-/*
- *  ======== threadFxn0 ========
- *  Open an ADC instance and get a sampling result from a one-shot conversion.
- */
-void *threadFxn0(void *arg0)
-{
-    ADC_Handle   adc;
-    ADC_Params   params;
-    int_fast16_t res;
-    while(1){
-        ADC_Params_init(&params);
-        adc = ADC_open(CONFIG_ADC_0, &params);
 
-        if (adc == NULL) {
-            UART_PRINT("Error initializing ADC0\n");
-            while (1);
-        }
-
-        /* Blocking mode conversion */
-        res = ADC_convert(adc, &adcValue0);
-
-        if (res == ADC_STATUS_SUCCESS) {
-
-            adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
-
-            //Display_printf(display, 0, 0, "ADC0 raw result: %d\n", adcValue0);
-            //UART_PRINT("ADC0 convert result: %4.2f V\n\r", (float) adcValue0MicroVolt/1000000.0);
-            char buffer[8];
-            UART_PRINT("ADC0 convert result: ");
-            sprintf(buffer, "%4.2f\n", (float)adcValue0MicroVolt/1000000.0);
-            UART_PRINT("%s", buffer);
-            UART_PRINT("V\n\r");
-        }
-        else {
-            UART_PRINT("ADC0 convert failed\n");
-        }
-
-        ADC_close(adc);
-    }
-
-    return (NULL);
-}
-
-/*
- *  ======== threadFxn1 ========
- *  Open a ADC handle and get an array of sampling results after
- *  calling several conversions.
- */
-void *threadFxn1(void *arg0)
-{
-    ADC_Handle   adc;
-    ADC_Params   params;
-    int_fast16_t res;
-    while(1){
-        ADC_Params_init(&params);
-        adc = ADC_open(CONFIG_ADC_1, &params);
-
-        if (adc == NULL) {
-            UART_PRINT("Error initializing ADC1\n");
-            while (1);
-        }
-
-        res = ADC_convert(adc, &adcValue1);
-
-        if (res == ADC_STATUS_SUCCESS) {
-
-            adcValue1MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue1);
-
-            //Display_printf(display, 0, 0, "ADC1 raw result: %d \n",
-                           //adcValue1);
-            UART_PRINT("ADC1 convert result: %f V\n\r", (float) adcValue1MicroVolt/1000000.0);
-        }
-        else {
-            UART_PRINT("ADC1 convert failed \n");
-        }
-
-        ADC_close(adc);
-    }
-    return (NULL);
-}
 
 //*****************************************************************************
 //                          LOCAL DEFINES
@@ -203,7 +124,7 @@ void *threadFxn1(void *arg0)
 
 #define WILL_TOPIC               "Client"
 #define WILL_MSG                 "Client Stopped"
-#define WILL_QOS                 MQTT_QOS_0
+#define WILL_QOS                 MQTT_QOS_1
 #define WILL_RETAIN              false
 
 /* Defining Broker IP address and port Number                                */
@@ -638,7 +559,7 @@ void * MqttClient(void *pvParameters)
     {
         /*waiting for signals                                                */
         if (mq_receive(g_PBQueue, (char*) &queueElemRecv, sizeof(struct msgQueue), NULL) == 0) break;
-        switch(queueElemRecv.event)
+        switch((int)queueElemRecv.event)
         {
         case PUBLISH_PUSH_BUTTON_PRESSED:
 
@@ -783,8 +704,10 @@ void Mqtt_start()
     unsigned mode = 0;
 
     /*sync object for inter thread communication                             */
-    attr.mq_maxmsg = 10;
-    attr.mq_msgsize = sizeof(struct msgQueue);
+    /* Message queue description flags: 0 or O_NONBLOCK.
+       Initialized from oflag argument of mq_open(). */
+    attr.mq_maxmsg = 100; /* Maximum number of messages on queue.  */
+    attr.mq_msgsize = sizeof(struct msgQueue); /* 12 is maximum message size. */
     g_PBQueue = mq_open("g_PBQueue", O_CREAT, mode, &attr);
 
     if(g_PBQueue == NULL)
@@ -1146,6 +1069,107 @@ int32_t DisplayAppBanner(char* appName,
     return(ret);
 }
 
+/*
+ *  ======== threadFxn0 ========
+ *  Open an ADC instance and get a sampling result from a one-shot conversion.
+ */
+#include <xdc/runtime/System.h>
+void *threadFxn0(void *arg0)
+{
+    ADC_Handle   adc;
+    ADC_Params   params;
+    int_fast16_t res;
+    struct msgQueue queueElement;
+    struct msgQueue queueElemRecv;
+
+    while(1){
+        ADC_Params_init(&params);
+        adc = ADC_open(CONFIG_ADC_0, &params);
+
+        if (adc == NULL) {
+            UART_PRINT("Error initializing ADC0\n");
+            while (1);
+        }
+
+        /* Blocking mode conversion */
+        res = ADC_convert(adc, &adcValue0);
+
+        if (res == ADC_STATUS_SUCCESS) {
+            adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
+            queueElement.event = PUBLISH_ADC0;
+            queueElement.msgPtr = NULL;
+
+            float val = adcValue0MicroVolt/1000000.0;
+            int whole = val;
+            int remainder = (val - whole)*100;
+            UART_PRINT("ADC0 convert result: %u.%u V\n\r", whole,remainder);
+        }
+        else {
+            UART_PRINT("ADC0 convert failed\n");
+        }
+        ADC_close(adc);
+
+        /* write message indicating disconnect push button pressed message      */
+        if(MQTT_SendMsgToQueue(&queueElement))
+        {
+            UART_PRINT(
+                "\n\n\rQueue is full, throw first msg and send the new one\n\n\r");
+            mq_receive(g_PBQueue, (char*) &queueElemRecv, sizeof(struct msgQueue),
+                       NULL);
+            MQTT_SendMsgToQueue(&queueElement);
+        }
+        sleep(2);
+    }
+
+
+    return (NULL);
+}
+
+/*
+ *  ======== threadFxn1 ========
+ *  Open a ADC handle and get an array of sampling results after
+ *  calling several conversions.
+ */
+void *threadFxn1(void *arg0)
+{
+    ADC_Handle   adc;
+    ADC_Params   params;
+    int_fast16_t res;
+    struct msgQueue queueElement;
+    struct msgQueue queueElemRecv;
+
+    while(1){
+        ADC_Params_init(&params);
+        adc = ADC_open(CONFIG_ADC_1, &params);
+
+        if (adc == NULL) {
+            UART_PRINT("Error initializing ADC1\n");
+            while (1);
+        }
+
+        res = ADC_convert(adc, &adcValue1);
+
+        if (res == ADC_STATUS_SUCCESS) {
+
+            adcValue1MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue1);
+            queueElement.event = PUBLISH_ADC1;
+            queueElement.msgPtr = NULL;
+
+            float val = adcValue1MicroVolt/1000000.0;
+            int whole = val;
+            int remainder = (val - whole)*100;
+            UART_PRINT("ADC1 convert result: %u.%u V\n\r", whole,remainder);
+        }
+        else {
+            UART_PRINT("ADC1 convert failed \n");
+        }
+
+        ADC_close(adc);
+        sleep(2);
+    }
+    return (NULL);
+}
+
 void mainThread(void * args)
 {
     uint32_t count = 0;
@@ -1234,10 +1258,11 @@ void mainThread(void * args)
     gResetApplication = false;
     gInitState = 0;
 
-    /*Connect to AP                                                      */
+    /*Tengjast netinu.                                                     */
     gApConnectionState = Mqtt_IF_Connect();
 
     gInitState |= MQTT_INIT_STATE;
+
     /*Run MQTT Main Thread (it will open the Client and Server)          */
     Mqtt_start();
 
@@ -1278,7 +1303,7 @@ void mainThread(void * args)
         while (1);
     }
 
-    retc |= pthread_attr_setstacksize(&pAttrs_adc, 1024);
+    retc |= pthread_attr_setstacksize(&pAttrs_adc, 4096);
     if (retc != 0) {
         /* pthread_attr_setstacksize() failed */
         while (1);

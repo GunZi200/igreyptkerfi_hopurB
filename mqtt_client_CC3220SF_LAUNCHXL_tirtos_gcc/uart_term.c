@@ -108,6 +108,7 @@ int Report(const char *pcFormat,
     char        *pcBuff;
     char        *pcTemp;
     int iSize = 256;
+    //int iSize = 1024;
     va_list list;
 
     pcBuff = (char*)malloc(iSize);
