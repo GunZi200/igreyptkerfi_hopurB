@@ -82,7 +82,7 @@ struct client_info
 
 struct msgQueue
 {
-    float event;
+    int event;
     void        *msgPtr;
     int32_t topLen;
 };

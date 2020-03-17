@@ -60,12 +60,12 @@ extern "C"
 
 /* AP SSID                                                                    */
 //#define SSID_NAME               "Gudni_iPhone"
-#define SSID_NAME               "Airhome_P9PZG"
+#define SSID_NAME               "Vodafone_BFMVB"
 /* Security type (OPEN or WEP or WPA)                                         */
 #define SECURITY_TYPE           SL_WLAN_SEC_TYPE_WPA
 /* Password of the secured AP                                                 */
 //#define SECURITY_KEY            "gudni123"
-#define SECURITY_KEY            "Vetur2015"
+#define SECURITY_KEY            "Vetur.2015"
 
 #define SSID_AP_MODE            "<ap-ssid>"
 #define SEC_TYPE_AP_MODE        SL_WLAN_SEC_TYPE_OPEN
