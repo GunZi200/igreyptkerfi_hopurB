@@ -36,7 +36,7 @@ server_client_cbs.o: ../server_client_cbs.c \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/posix/gcc/mqueue.h \
  ../uart_term.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/UART.h \
- C:/Users/Gudni/Downloads/mqtt_test/mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc/Debug/syscfg/ti_drivers_config.h \
+ C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc/Debug/syscfg/ti_drivers_config.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/devices/DeviceFamily.h \
  ../server_client_cbs.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/net/mqtt/mqttserver.h \
@@ -124,7 +124,7 @@ C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/posix/gcc/mqueue.h:
 
 C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/UART.h:
 
-C:/Users/Gudni/Downloads/mqtt_test/mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc/Debug/syscfg/ti_drivers_config.h:
+C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc/Debug/syscfg/ti_drivers_config.h:
 
 C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/devices/DeviceFamily.h:
 

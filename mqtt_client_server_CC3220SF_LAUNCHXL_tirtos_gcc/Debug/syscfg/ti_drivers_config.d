@@ -11,6 +11,9 @@ syscfg/ti_drivers_config.o: syscfg/ti_drivers_config.c \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/display/DisplayUart.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/dpl/SemaphoreP.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/UART.h \
+ C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/ADC.h \
+ C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/adc/ADCCC32XX.h \
+ C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/devices/cc32xx/driverlib/adc.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/crypto/CryptoCC32XX.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/dpl/HwiP.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/dma/UDMACC32XX.h \
@@ -63,6 +66,12 @@ C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/display/DisplayUart.h:
 C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/dpl/SemaphoreP.h:
 
 C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/UART.h:
+
+C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/ADC.h:
+
+C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/adc/ADCCC32XX.h:
+
+C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/devices/cc32xx/driverlib/adc.h:
 
 C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/crypto/CryptoCC32XX.h:
 

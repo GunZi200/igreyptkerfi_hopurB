@@ -59,7 +59,7 @@ network_if.o: ../network_if.c \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/net/wifi/source/nonos.h \
  ../network_if.h ../uart_term.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/UART.h \
- C:/Users/Gudni/Downloads/mqtt_test/mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc/Debug/syscfg/ti_drivers_config.h \
+ C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc/Debug/syscfg/ti_drivers_config.h \
  C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/devices/DeviceFamily.h
 
 C:/ti/simplelink_cc32xx_sdk_3_40_00_05/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/include/string.h:
@@ -184,6 +184,6 @@ C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/net/wifi/source/nonos.h
 
 C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/UART.h:
 
-C:/Users/Gudni/Downloads/mqtt_test/mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc/Debug/syscfg/ti_drivers_config.h:
+C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc/Debug/syscfg/ti_drivers_config.h:
 
 C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/devices/DeviceFamily.h:

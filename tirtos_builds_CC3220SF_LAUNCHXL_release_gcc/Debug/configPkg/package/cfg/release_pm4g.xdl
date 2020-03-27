@@ -8,8 +8,8 @@ __STACK_SIZE = STACKSIZE;
 __TI_STACK_SIZE = __STACK_SIZE;
 
 INPUT(
-    C:\Users\Gudni\Downloads\mqtt_test\tirtos_builds_CC3220SF_LAUNCHXL_release_gcc\Debug\configPkg\package\cfg\release_pm4g.om4g
-    C:\Users\Gudni\Downloads\mqtt_test\tirtos_builds_CC3220SF_LAUNCHXL_release_gcc\src\sysbios\sysbios.am4g
+    C:\Users\Gudni\Downloads\igreyptkerfi_hopurB\tirtos_builds_CC3220SF_LAUNCHXL_release_gcc\Debug\configPkg\package\cfg\release_pm4g.om4g
+    C:\Users\Gudni\Downloads\igreyptkerfi_hopurB\tirtos_builds_CC3220SF_LAUNCHXL_release_gcc\src\sysbios\sysbios.am4g
     C:\ti\simplelink_cc32xx_sdk_3_40_00_05\kernel\tirtos\packages\gnu\targets\arm\rtsv7M\lib\boot.am4g
     C:\ti\simplelink_cc32xx_sdk_3_40_00_05\kernel\tirtos\packages\gnu\targets\arm\rtsv7M\lib\syscalls.am4g
     C:\ti\ccs930\xdctools_3_60_02_34_core\packages\xdc\rov\runtime\lib\xdc.rov.runtime.am4g

@@ -27,6 +27,16 @@ extern "C" {
 
 
 /*
+ *  ======== ADC ========
+ */
+
+/* P60 */
+#define CONFIG_ADC_0                0
+/* P59 */
+#define CONFIG_ADC_1                1
+
+
+/*
  *  ======== Crypto ========
  */
 

@@ -9,6 +9,7 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     print("Subscribing...")
     client.subscribe("/cc32xx/ButtonPressEvtSw2", 2)
+    client.subscribe("ADC0", 1)
     print("Done.")
     
 

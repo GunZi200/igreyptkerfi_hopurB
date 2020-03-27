@@ -52,6 +52,9 @@
 //
 //*****************************************************************************
 /* Standard includes                                                         */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <mqueue.h>
@@ -61,6 +64,7 @@
 /* TI-Driver includes                                                        */
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/SPI.h>
+#include <ti/drivers/ADC.h>
 
 /* Simplelink includes                                                       */
 #include <ti/drivers/net/wifi/simplelink.h>
@@ -82,10 +86,26 @@
 /* Application includes                                                      */
 #include "server_client_cbs.h"
 
+#include <xdc/std.h>
+#include <xdc/runtime/System.h>
+
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/knl/Task.h>
+#include <ti/sysbios/knl/Semaphore.h>
+
+#include <xdc/cfg/global.h>
+
+/* ADC conversion result variables */
+uint16_t adcValue0;
+char adcValue0MicroVolt[10];
+uint16_t adcValue1;
+uint32_t adcValue1MicroVolt;
+
 //*****************************************************************************
 //                          LOCAL DEFINES
 //*****************************************************************************
-#define ENABLE_SERVER            1
+//#define ENABLE_SERVER            1
 
 #if ENABLE_SERVER
 /* enables secured server                                                    */
@@ -136,7 +156,7 @@
 #define CLEAN_SESSION            true
 
 /* Retain Flag. Used in publish message.                                     */
-#define RETAIN_ENABLE            1
+#define RETAIN_ENABLE            0
 
 /* Defining Number of subscription topics                                    */
 #define SUBSCRIPTION_TOPIC_COUNT 1
@@ -146,6 +166,8 @@
 
 /* Defining Publish Topic Values                                             */
 #define PUBLISH_TOPIC0           "/cc32xx/ButtonPressEvtSw2"
+#define PUBLISH_TOPIC1           "ADC0"
+#define PUBLISH_TOPIC1_DATA           adcValue0MicroVolt
 #define PUBLISH_TOPIC0_DATA \
     "Push Button SW2 has been pressed on CC32xx device"
 
@@ -249,6 +271,8 @@ unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
 /* Publishing topics and messages                                            */
 const char *publish_topic = { PUBLISH_TOPIC0 };
 const char *publish_data = { PUBLISH_TOPIC0_DATA };
+const char *publish_adc0_topic = {PUBLISH_TOPIC1};
+const char *publish_adc0_data = { PUBLISH_TOPIC1_DATA };
 
 /* Message Queue                                                             */
 mqd_t g_PBQueue;
@@ -653,6 +677,21 @@ void * MqttClientServer(void *pvParameters)
 
             break;
 
+        case PUBLISH_ADC0:
+
+            /* send publish message                                       */
+            lRetVal =
+                MQTTClient_publish(gMqttClient, (char*) publish_adc0_topic, strlen(
+                                      (char*) publish_adc0_topic),
+                                  (char*) publish_adc0_data,
+                                  strlen((char*) publish_adc0_data), MQTT_QOS_1 |
+                                  ((RETAIN_ENABLE) ? MQTT_PUBLISH_RETAIN : 0));
+
+            UART_PRINT("\n\r CC3200 Publishes the following message \n\r");
+            UART_PRINT("Topic: %s\n\r", publish_adc0_topic);
+            UART_PRINT("Data: %s\n\r", publish_adc0_data);
+            break;
+
         /* msg received by server (on the enrolled topic by on-board  */
         /* client) publish it to the remote broker                    */
         case MSG_RECV_BY_SERVER:
@@ -737,7 +776,8 @@ void * MqttClientServer(void *pvParameters)
             return(NULL);
 
         default:
-            sleep(1);
+            //sleep(1);
+            Task_sleep(50);
             break;
         }
     }
@@ -854,7 +894,7 @@ void Mqtt_start()
 
     /* Set priority and stack size attributes                                */
     pthread_attr_init(&pAttrs);
-    priParam.sched_priority = 2;
+    priParam.sched_priority = 10;
     retc = pthread_attr_setschedparam(&pAttrs, &priParam);
     retc |= pthread_attr_setstacksize(&pAttrs, MQTTTHREADSIZE);
     retc |= pthread_attr_setdetachstate(&pAttrs, PTHREAD_CREATE_DETACHED);
@@ -954,7 +994,7 @@ int32_t MqttServer_start()
 
     /* start the Server Run task                                             */
     pthread_attr_init(&pAttrs);
-    priParam.sched_priority = 2;
+    priParam.sched_priority = 1;
     lRetVal = pthread_attr_setschedparam(&pAttrs, &priParam);
     lRetVal |= pthread_attr_setstacksize(&pAttrs, 4096);
     lRetVal |= pthread_attr_setdetachstate(&pAttrs, PTHREAD_CREATE_DETACHED);
@@ -1315,11 +1355,109 @@ int32_t DisplayAppBanner(char* appName,
     return(ret);
 }
 
+/*
+ *  ======== threadFxn0 ========
+ *  Open an ADC instance and get a sampling result from a one-shot conversion.
+ */
+void *threadFxn0(void *arg0){
+    ADC_Handle   adc;
+    ADC_Params   params;
+    int_fast16_t res;
+    struct msgQueue queueElement;
+    struct msgQueue queueElemRecv;
+
+    for(;;){
+        ADC_Params_init(&params);
+        adc = ADC_open(CONFIG_ADC_0, &params);
+
+        if (adc == NULL) {
+            UART_PRINT("Error initializing ADC0\n");
+            while (1);
+        }
+
+        /* Blocking mode conversion */
+        res = ADC_convert(adc, &adcValue0);
+        ADC_close(adc);
+
+        if (res == ADC_STATUS_SUCCESS) {
+            uint32_t temp = ADC_convertRawToMicroVolts(adc, adcValue0);
+            float val = temp/1000000.0;
+
+            int whole = val;
+            int remainder = (val - whole)*100;
+            sprintf(adcValue0MicroVolt, "%d.%dV", whole, remainder);
+            //UART_PRINT("ADC0 convert result: %u.%u V\n\r", whole,remainder);
+            queueElement.event = PUBLISH_ADC0;
+            queueElement.msgPtr = &adcValue0MicroVolt;
+            /* write message indicating disconnect push button pressed message      */
+            if(MQTT_SendMsgToQueue(&queueElement)){
+                UART_PRINT("\n\n\rQueue is full, throw first msg and send the new one\n\n\r");
+                mq_receive(g_PBQueue, (char*) &queueElemRecv, sizeof(struct msgQueue),NULL);
+                MQTT_SendMsgToQueue(&queueElement);
+            }
+        } else {
+            UART_PRINT("ADC0 convert failed\n");
+        }
+        //sleep(1);
+        Task_sleep(1000);
+    }
+    return (NULL);
+}
+
+/*
+ *  ======== threadFxn1 ========
+ *  Open a ADC handle and get an array of sampling results after
+ *  calling several conversions.
+ */
+void *threadFxn1(void *arg0){
+    ADC_Handle   adc;
+    ADC_Params   params;
+    int_fast16_t res;
+    struct msgQueue queueElement;
+    struct msgQueue queueElemRecv;
+
+    for(;;){
+        ADC_Params_init(&params);
+        adc = ADC_open(CONFIG_ADC_1, &params);
+
+        if (adc == NULL) {
+            UART_PRINT("Error initializing ADC1\n");
+            while (1);
+        }
+
+        res = ADC_convert(adc, &adcValue1);
+        ADC_close(adc);
+        if (res == ADC_STATUS_SUCCESS) {
+
+            adcValue1MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue1);
+
+            float val = adcValue1MicroVolt/1000000.0;
+            int whole = val;
+            int remainder = (val - whole)*100;
+            UART_PRINT("ADC1 convert result: %u.%u V\n\r", whole,remainder);
+            queueElement.event = PUBLISH_PUSH_BUTTON_PRESSED;
+            queueElement.msgPtr = &adcValue1MicroVolt;
+
+            /* write message indicating disconnect push button pressed message      */
+            if(MQTT_SendMsgToQueue(&queueElement)){
+                UART_PRINT("\n\n\rQueue is full, throw first msg and send the new one\n\n\r");
+                mq_receive(g_PBQueue, (char*) &queueElemRecv, sizeof(struct msgQueue),NULL);
+                MQTT_SendMsgToQueue(&queueElement);
+            }
+        }else {
+            UART_PRINT("ADC1 convert failed \n");
+        }
+        sleep(2);
+    }
+    return (NULL);
+}
+
 void mainThread(void * args)
 {
     uint32_t count = 0;
     pthread_t spawn_thread = (pthread_t) NULL;
-    pthread_attr_t pAttrs_spawn;
+    pthread_t thread0, thread1;
+    pthread_attr_t pAttrs_spawn, pAttrs_adc;
     struct sched_param priParam;
     int32_t retc = 0;
     UART_Handle tUartHndl;
@@ -1333,6 +1471,7 @@ void mainThread(void * args)
 
     GPIO_init();
     SPI_init();
+    ADC_init();
 
     /* Configure the UART */
     tUartHndl = InitTerm();
@@ -1384,6 +1523,7 @@ void mainThread(void * args)
         }
     }
 
+
     if(retc < 0)
     {
         /* Handle Error */
@@ -1393,6 +1533,44 @@ void mainThread(void * args)
             ;
         }
     }
+
+    /* Create the sl_Task */
+    pthread_attr_init(&pAttrs_adc);
+    priParam.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&pAttrs_adc, &priParam);
+    retc |= pthread_attr_setstacksize(&pAttrs_adc, TASKSTACKSIZE);
+    retc |= pthread_attr_setdetachstate(&pAttrs_adc, PTHREAD_CREATE_DETACHED);
+
+    retc = pthread_create(&thread0, &pAttrs_adc, threadFxn0, NULL);
+
+    if(retc != 0)
+    {
+        UART_PRINT("could not create simplelink task\n\r");
+        while(1)
+        {
+            ;
+        }
+    }
+
+
+    /*priParam.sched_priority = 1;
+    pthread_attr_setschedparam(&pAttrs_adc, &priParam);
+
+    retc = pthread_create(&thread0, &pAttrs_adc, threadFxn0, NULL);*/
+    /*if (retc != 0) {
+
+        UART_PRINT("Failed to create thread0.");
+        while (1);
+    }*/
+
+
+    /*retc = pthread_create(&thread1, &pAttrs_adc, threadFxn1, NULL);
+    if (retc != 0) {
+
+        UART_PRINT("Failed to create thread1.");
+        while (1);
+    }*/
+
 
     while(1)
     {

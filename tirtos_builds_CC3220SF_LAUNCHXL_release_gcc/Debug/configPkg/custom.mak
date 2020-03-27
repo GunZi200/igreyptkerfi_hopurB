@@ -7,5 +7,5 @@
 #       or equal to the generated config header
 #
 linker.cmd: package/cfg/release_pm4g.xdl
-	$(SED) 's"^\"\(package/cfg/release_pm4gcfg.cmd\)\"$""\"C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg/\1\""' package/cfg/release_pm4g.xdl > $@
+	$(SED) 's"^\"\(package/cfg/release_pm4gcfg.cmd\)\"$""\"C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg/\1\""' package/cfg/release_pm4g.xdl > $@
 	-$(SETDATE) -r:max package/cfg/release_pm4g.h compiler.opt compiler.opt.defs

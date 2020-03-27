@@ -1588,7 +1588,7 @@ __FAR__ const xdc_SizeT ti_sysbios_knl_Task_Module_State_terminatedQ__O = offset
  *  Define absolute path prefix for this executable's
  *  configuration generated files.
  */
-xdc__META(__ASM__, "@(#)__ASM__ = C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg/package/cfg/release_pm4g");
+xdc__META(__ASM__, "@(#)__ASM__ = C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg/package/cfg/release_pm4g");
 
 /*
  *  ======== __ISA__ ========

@@ -6,8 +6,8 @@ SHELL = cmd.exe
 
 CG_TOOL_ROOT := C:/ti/ccs930/ccs/tools/compiler/gcc-arm-none-eabi-7-2017-q4-major-win32
 
-GEN_OPTS__FLAG := @"C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg/compiler.opt"
-GEN_CMDS__FLAG := -Wl,-T"C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg/linker.cmd"
+GEN_OPTS__FLAG := @"C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg/compiler.opt"
+GEN_CMDS__FLAG := -Wl,-T"C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg/linker.cmd"
 
 ORDERED_OBJS += \
 "./syscfg/ti_net_config.o" \
@@ -158,10 +158,10 @@ all: $(OBJS) $(LDS_SRCS) $(GEN_CMDS)
 	@$(MAKE) --no-print-directory -Onone "mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc.out" secondary-outputs
 
 dependents:
-	-cd C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug && $(MAKE) all
+	-cd C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug && $(MAKE) all
 
 # Tool invocations
-mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc.out: $(OBJS) $(LDS_SRCS) $(GEN_CMDS) C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/libtirtos_builds_CC3220SF_LAUNCHXL_release_gcc.a
+mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc.out: $(OBJS) $(LDS_SRCS) $(GEN_CMDS) C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/libtirtos_builds_CC3220SF_LAUNCHXL_release_gcc.a
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: GNU Linker'
 	"C:/ti/ccs930/ccs/tools/compiler/gcc-arm-none-eabi-7-2017-q4-major-win32/bin/arm-none-eabi-gcc-7.2.1.exe" -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -march=armv7e-m -mthumb -Wl,-Map,"mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc.map" -nostartfiles -static -Wl,--gc-sections -L"C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/net/mqtt/lib" -L"C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/net/lib" -L"C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/net/wifi/slnetif" -L"C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source" -L"C:/ti/simplelink_cc32xx_sdk_3_40_00_05/source/ti/drivers/net/wifi" -L"C:/ti/simplelink_cc32xx_sdk_3_40_00_05/kernel/tirtos/packages" -L"C:/ti/simplelink_cc32xx_sdk_3_40_00_05/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m" -L"C:/ti/ccs930/ccs/tools/compiler/gcc-arm-none-eabi-7-2017-q4-major-win32/arm-none-eabi/lib" -march=armv7e-m -mthumb --specs=nano.specs -o"mqtt_client_server_CC3220SF_LAUNCHXL_tirtos_gcc.out" $(ORDERED_OBJS)
@@ -188,7 +188,7 @@ secondary-outputs: $(BIN_OUTPUTS)
 
 .PHONY: all clean dependents
 .SECONDARY:
-C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/libtirtos_builds_CC3220SF_LAUNCHXL_release_gcc.a:
+C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/libtirtos_builds_CC3220SF_LAUNCHXL_release_gcc.a:
 
 -include ../makefile.targets
 

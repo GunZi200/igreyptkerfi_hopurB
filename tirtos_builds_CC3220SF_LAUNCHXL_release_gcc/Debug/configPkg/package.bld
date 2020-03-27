@@ -11,7 +11,7 @@ var makeAssembly = false;
 var Executable = xdc.module('xdc.bld.Executable');
 
 var exeOpts = new Executable.Attrs({
-        cfgScript: 'C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/release.cfg',
+        cfgScript: 'C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/release.cfg',
         profile: 'release',
         cfgHome: 'configPkg',
 });
@@ -41,7 +41,7 @@ else {
 
 var thisObj = {
     cfg:        '../release.cfg',
-    outputPath: 'C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg',
+    outputPath: 'C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/configPkg',
     exeName:    'release' + suffix,
     exeIntName: 'release' + suffix.replace('.', '_'),
     targ:       targ,

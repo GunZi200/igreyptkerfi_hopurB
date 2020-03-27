@@ -39,7 +39,7 @@ int32_t ti_net_SlNet_initConfig() {
     if (status == 0) {
         status = SlNetIf_add(SLNETIF_ID_1, "CC32xx",
                 (const SlNetIf_Config_t *)&SlNetIfConfigWifi,
-                5);
+                11);
     }
 
     return (status);

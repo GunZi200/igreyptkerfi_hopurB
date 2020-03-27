@@ -2841,7 +2841,7 @@
         <module name="xdc.cfg.SourceDir"
                 used="true"
                 uses="">
-            <feature name="outputDir" type="string" value="C%3A%5CUsers%5CGudni%5CDownloads%5Cmqtt_test%5Ctirtos_builds_CC3220SF_LAUNCHXL_release_gcc/src"/>
+            <feature name="outputDir" type="string" value="C%3A%5CUsers%5CGudni%5CDownloads%5Cigreyptkerfi_hopurB%5Ctirtos_builds_CC3220SF_LAUNCHXL_release_gcc/src"/>
             <feature name="toBuildDir" type="string" value=".."/>
             <feature name="makefileName" type="string" value="makefile.libs"/>
             <feature name="verbose" type="number" value="2"/>
@@ -7955,7 +7955,7 @@ examine the Exception view for the ti.sysbios.family.arm.m3.Hwi module using ROV
                 uses="">
         </module>
     </package>
-    <package name="configPkg" version="" repository="C:/Users/Gudni/Downloads/mqtt_test/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/">
+    <package name="configPkg" version="" repository="C:/Users/Gudni/Downloads/igreyptkerfi_hopurB/tirtos_builds_CC3220SF_LAUNCHXL_release_gcc/Debug/">
     </package>
 </imports>
 </configuration>

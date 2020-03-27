@@ -50,6 +50,57 @@ const uint_least8_t Display_count = 1;
 
 
 /*
+ *  =============================== ADC ===============================
+ */
+
+#include <ti/drivers/ADC.h>
+#include <ti/drivers/adc/ADCCC32XX.h>
+
+#include <ti/devices/cc32xx/driverlib/adc.h>
+
+#define CONFIG_ADC_COUNT 2
+
+/*
+ *  ======== adcCCC32XXObjects ========
+ */
+ADCCC32XX_Object adcCC32XXObjects[CONFIG_ADC_COUNT];
+
+/*
+ *  ======== adcCC3220SHWAttrs ========
+ */
+const ADCCC32XX_HWAttrsV1 adcCC32XXHWAttrs[CONFIG_ADC_COUNT] = {
+    /* CONFIG_ADC_0 */
+    {
+        .adcPin = ADCCC32XX_PIN_60_CH_3,
+    },
+    /* CONFIG_ADC_1 */
+    {
+        .adcPin = ADCCC32XX_PIN_59_CH_2,
+    },
+};
+
+/*
+ *  ======== ADC_config ========
+ */
+const ADC_Config ADC_config[CONFIG_ADC_COUNT] = {
+    /* CONFIG_ADC_0 */
+    {
+        .fxnTablePtr = &ADCCC32XX_fxnTable,
+        .object = &adcCC32XXObjects[CONFIG_ADC_0],
+        .hwAttrs = &adcCC32XXHWAttrs[CONFIG_ADC_0]
+    },
+    /* CONFIG_ADC_1 */
+    {
+        .fxnTablePtr = &ADCCC32XX_fxnTable,
+        .object = &adcCC32XXObjects[CONFIG_ADC_1],
+        .hwAttrs = &adcCC32XXHWAttrs[CONFIG_ADC_1]
+    },
+};
+
+const uint_least8_t ADC_count = CONFIG_ADC_COUNT;
+
+
+/*
  *  =============================== Crypto ===============================
  */
 
